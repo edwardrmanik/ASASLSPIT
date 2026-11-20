@@ -1,5 +1,7 @@
 "use strict";
 
+// testing perubahan
+
 const catalogBrands = [
     {nama: "Apple iBox", 
         imageLink: "https://zonalogo.com/assets/apple-logo-png-svg.webp"},
