@@ -477,7 +477,6 @@ tombolBeli.forEach((btn) => {
     });
   }
 
-  // Tutup modal
   document.getElementById("gv-close-btn").addEventListener("click", () => {
     modal.classList.remove("active");
   });
@@ -486,7 +485,6 @@ tombolBeli.forEach((btn) => {
     if (e.target === modal) modal.classList.remove("active");
   });
 
-  // Checkout
   document.getElementById("gv-checkout-btn").addEventListener("click", () => {
     if (keranjang.length === 0) return alert("Keranjang masih kosong!");
     alert("Checkout berhasil! Terima kasih sudah belanja di GADGETVERSE.");
@@ -496,3 +494,5 @@ tombolBeli.forEach((btn) => {
     modal.classList.remove("active");
   });
 })();
+
+
