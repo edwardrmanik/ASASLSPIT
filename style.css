@@ -636,3 +636,29 @@
     font-size: 13px;
     font-weight: 700;
 }
+
+.search-wrapper {
+    margin-top: 16px;
+    max-width: 480px;
+    width: 100%;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: #2563eb;
+}
+
+.empty-search-msg {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 24px;
+    color: #6b7280;
+}

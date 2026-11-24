@@ -1,7 +1,5 @@
 "use strict";
 
-// testing perubahan
-
 const catalogBrands = [
     {nama: "Apple iBox", 
         imageLink: "https://zonalogo.com/assets/apple-logo-png-svg.webp"},
@@ -18,9 +16,9 @@ const catalogBrands = [
     {nama: "OnePlus", 
         imageLink: "https://static.vecteezy.com/system/resources/previews/068/277/124/non_2x/oneplus-black-icon-mobile-company-brand-official-logo-emblem-premium-quality-transparent-background-free-png.png"},
 ];
-
+        
 const catalogProduk = [
-    {
+    {  
         id: 1,
         name: "iPhone 15 Pro 128GB Titanium",
         priceString: "Rp 18.999.000",
@@ -70,34 +68,47 @@ const catalogProduk = [
     },
 ];
 
-const appleDiv = document.querySelector(".apple-logo");
-const samsungDiv = document.createElement("div");
- samsungDiv.classList.add("samsung-logo");
+// const appleDiv = document.querySelector(".apple-logo");
+// const samsungDiv = document.createElement("div");
+//  samsungDiv.classList.add("samsung-logo");
 
- const imEl = document.createElement("img");
- imEl.src = "https://zonalogo.com/assets/samsung-logo-png-svg.webp?asset=2649";
- imEl.alt = "Samsung Logo";
- imEl.classList.add("brandpid");
- imEl.style.width = "40px";
+//  const imEl = document.createElement("img");
+//  imEl.src = "https://zonalogo.com/assets/samsung-logo-png-svg.webp?asset=2649";
+//  imEl.alt = "Samsung Logo";
+//  imEl.classList.add("brandpid");
+//  imEl.style.width = "40px";
 
- const textEl = document.createElement("p");
- textEl.classList.add("brand-p");
- textEl.textContent = "Samsung TAM";
+//  const textEl = document.createElement("p");
+//  textEl.classList.add("brand-p");
+//  textEl.textContent = "Samsung TAM";
 
- samsungDiv.appendChild(imEl);
- samsungDiv.appendChild(textEl);
- appleDiv.appendChild(samsungDiv); 
+//  samsungDiv.appendChild(imEl);
+//  samsungDiv.appendChild(textEl);
+//  appleDiv.appendChild(samsungDiv); 
 
- const brandContainer = document.querySelector(".brand-logo-main");
- if (brandContainer) {
+const KATEGORI_LIST = ["iPhone", "Samsung", "Powerbank", "TWS"];
+
+const brandContainer = document.querySelector(".brand-logo-main");
+const productContainer = document.querySelector(".catalog-container");
+const catalogHeader = document.querySelector(".catalog-header");
+
+let selectedCategory = "";
+let searchInputEl = null;
+let clearBtnEl = null;
+let categoryButtons = [];
+
+function renderBrands(brands){
+    if(!brandContainer) return;
     brandContainer.innerHTML = "";
-     const brandFragment = document.createDocumentFragment();
-     catalogBrands.forEach((brand, index) => {
+    const fragment = document.createDocumentFragment();
+
+    brands.forEach((brand,index) => {
         const brandDiv = document.createElement("div");
         brandDiv.className = `brand-item-${index + 1}`;
+
         const imgEl = document.createElement("img");
         imgEl.src = brand.imageLink;
-        imgEl.alt = `${brand.nama} Logo`;
+        imgEl.alt = `${brand.nama}Logo`;
         imgEl.className = "brandpict";
 
         const pEl = document.createElement("p");
@@ -106,32 +117,40 @@ const samsungDiv = document.createElement("div");
 
         brandDiv.appendChild(imgEl);
         brandDiv.appendChild(pEl);
+        fragment.appendChild(brandDiv)
+    });
 
-        brandFragment.appendChild(brandDiv);
-     });
+    brandContainer.appendChild(fragment);
+}
 
-     brandContainer.appendChild(brandFragment);
+function renderProducts(products, label =""){
+    if(!productContainer) return;
+    productContainer.innerHTML ="";
+
+    if(!products||products.length === 0){
+        const emptyMsg = document.createElement("p");
+        emptyMsg.className = "search-empty";
+        emptyMsg.textContent = `Tidak ada produk yang cocok dengan "${label}".`;
+        productContainer.appendChild(emptyMsg);
+        return;
     }
 
+    const fragment = document.createDocumentFragment();
 
-    const productContainer = document.querySelector(".catalog-container");
-    if (productContainer) {
-        productContainer.innerHTML = "";
-        const productFragment = document.createDocumentFragment();
-        catalogProduk.forEach((prod, index) => {
+    products.forEach((prod, index) => {
         const cardDiv = document.createElement("div");
-        cardDiv.className = `product-item-${index + 1}`;
+        cardDiv.className = `product-card${index + 1}product-item-${prod.id}`;
 
         const cardHeader = document.createElement("div");
         cardHeader.className = "card-header";
 
         const badgeTag = document.createElement("span");
         badgeTag.className = "badge-tag";
-        badgeTag.textContent = prod.badge;  
+        badgeTag.textContent = prod.badge||"OFFICIAL";
 
         const categoryTag = document.createElement("span");
         categoryTag.className = "category-tag";
-        categoryTag.textContent = prod.category;
+        categoryTag.textContent = prod.category||"Gadget";
 
         cardHeader.appendChild(badgeTag);
         cardHeader.appendChild(categoryTag);
@@ -162,8 +181,8 @@ const samsungDiv = document.createElement("div");
         descP.textContent = prod.description;
 
         const specsContainer = document.createElement("div");
-        specsContainer.className = "specs-tags";
-        prod.spesifikasi.forEach(spec => {
+        specsContainer.className = "specs-tag";
+        (prod.spesifikasi||[]).forEach((spec) => {
             const specTag = document.createElement("span");
             specTag.className = "spec-tag";
             specTag.textContent = spec;
@@ -174,13 +193,14 @@ const samsungDiv = document.createElement("div");
         actionsDiv.className = "card-actions";
 
         const btnPrimary = document.createElement("button");
+        btnPrimary.type = "button";
         btnPrimary.className = "btn-primary";
         btnPrimary.textContent = "Beli Sekarang";
 
         const btnSecondary = document.createElement("button");
+        btnSecondary.type = "button";
         btnSecondary.className = "btn-secondary";
         btnSecondary.textContent = "Spesifikasi";
-
 
         actionsDiv.appendChild(btnPrimary);
         actionsDiv.appendChild(btnSecondary);
@@ -195,17 +215,125 @@ const samsungDiv = document.createElement("div");
         cardDiv.appendChild(imageDiv);
         cardDiv.appendChild(productInfo);
 
-        productFragment.appendChild(cardDiv);
+        fragment.appendChild(cardDiv);
     });
 
-    productContainer.appendChild(productFragment);
+    productContainer.appendChild(fragment);
+}
+
+function updateCategoryButtons(){
+    categoryButtons.forEach((btn) => {
+        const isActive = btn.dataset.category === selectedCategory;
+        btn.classList.toggle("active", isActive);
+    });
+}
+
+function runCombinedFilter(){
+    const rawKeyword = searchInputEl?searchInputEl.value:"";
+    const trimmedKeyword = rawKeyword.trim();
+    const searchKey = trimmedKeyword.toLowerCase();
+    const categoryKey = selectedCategory.toLowerCase();
+
+    if(!searchKey&&!categoryKey){
+        renderProducts(catalogProduk);
+        return;
     }
 
-    //  //  console.log(card);
-     
-    // //  for (const brand of catalogBrands) {
-    // //      // console.log(brand.nama);
-    // //     }
+    const filtered = catalogProduk.filter((prod) => {
+        const nameLower = prod.name.toLowerCase();
+        const descLower = prod.description.toLowerCase();
+        const specsLower = (prod.spesifikasi||[]).map((s) => s.toLowerCase());
 
+        const matchSearch = !searchKey||(
+            nameLower.includes(searchKey)||
+            descLower.includes(searchKey)||
+            specsLower.some((s) => s.includes(searchKey))
+        );
 
+        const matchCategory = !categoryKey||(
+            nameLower.includes(categoryKey)||
+            descLower.includes(categoryKey)||
+            specsLower.some((s) => s.includes(categoryKey))
+        );
 
+        return matchSearch && matchCategory;
+    });
+
+    renderProducts(filtered, trimmedKeyword || selectedCategory);
+}
+
+function createSearchAndCategoryFilter(){
+    const wrapper = document.createElement("div");
+    wrapper.className = "search-filter-wrapper";
+
+    const searchBox = document.createElement("div");
+    searchBox.className = "search-wrapper";
+
+    const searchInput = document.createElement("input");
+    searchInput.type = "search";
+    searchInput.id = "searchInput";
+    searchInput.className = "search-input";
+    searchInput.placeholder = "Cari produk (misal: iPhone, Samsung, Powerbank, TWS)...";
+    searchInput.setAttribute("aria-label", "Cari produk");
+
+    const clearBtn = document.createElement("button");
+    clearBtn.type = "button";
+    clearBtn.className = "search-clear";
+    clearBtn.textContent = "BATAL";
+    clearBtn.style.display = "none";
+    searchInputEl = searchInput;
+    clearBtnEl = clearBtn;
+
+    searchInput.addEventListener("input", (event) => {
+        const val = event.target.value;
+        clearBtn.style.display = val.trim()?"inline-flex":"none";
+        runCombinedFilter();
+    });
+
+    clearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        clearBtn.style.display = "none";
+        selectedCategory = "";
+        updateCategoryButtons();
+        runCombinedFilter();
+        searchInput.focus();
+    });
+
+    searchBox.appendChild(searchInput);
+    searchBox.appendChild(clearBtn);
+
+    const filterRow = document.createElement("div");
+    filterRow.className = "category-filter-row";
+    
+    categoryButtons = [];
+
+    KATEGORI_LIST.forEach((cat) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "category-filter-btn";
+        btn.dataset.category = cat;
+        btn.textContent = cat;
+
+        btn.addEventListener("click", () => {
+            selectedCategory = selectedCategory === cat?"":cat;
+            updateCategoryButtons();
+            runCombinedFilter();
+        });
+
+        categoryButtons.push(btn);
+        filterRow.appendChild(btn);
+    });
+
+    wrapper.appendChild(searchBox);
+    wrapper.appendChild(filterRow);
+
+    return wrapper;
+}
+
+renderBrands(catalogBrands);
+
+if(catalogHeader){
+    catalogHeader.appendChild(createSearchAndCategoryFilter());
+}
+
+renderProducts(catalogProduk);
