@@ -1,7 +1,5 @@
 "use strict";
 
-// testing perubahan
-
 const catalogBrands = [
     {nama: "Apple iBox", 
         imageLink: "https://zonalogo.com/assets/apple-logo-png-svg.webp"},
@@ -209,3 +207,292 @@ const samsungDiv = document.createElement("div");
 
 
 
+//mikha (bagian keranjang)
+
+//<button class="btn-primary">Beli Sekarang</button>
+//<button class="btn-cart">Keranjang (0)</button>
+
+let jumlahKeranjang = 0;
+
+const cartBtn = document.getElementById("btn-cart");
+const tombolBeli = document.querySelectorAll(".btn-primary");
+
+tombolBeli.forEach((btn) => {
+    btn.addEventListener("click", () => {
+        jumlahKeranjang++;
+        cartBtn.textContent = `keranjang (${jumlahKeranjang})`;
+    });
+});
+
+(() => {
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes gvPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+    .gv-pulse {
+      animation: gvPulse 0.3s ease-in-out;
+    }
+    #gv-cart-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      font-family: inherit;
+    }
+    #gv-cart-modal.active {
+      display: flex;
+    }
+    .gv-modal-box {
+      background: #fff;
+      width: 92%;
+      max-width: 480px;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+    }
+    .gv-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 12px;
+    }
+    .gv-modal-header h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+    #gv-close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    #gv-cart-list {
+      margin: 14px 0;
+      max-height: 290px;
+      overflow-y: auto;
+    }
+    .gv-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .gv-item-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .gv-item-sub {
+      font-size: 12px;
+      color: #64748b;
+    }
+    .gv-qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .gv-qty-controls button {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      border-radius: 6px;
+      padding: 2px 8px;
+      cursor: pointer;
+    }
+    .gv-qty-controls .gv-del {
+      background: #fee2e2;
+      border-color: #fecaca;
+      color: #dc2626;
+    }
+    .gv-modal-footer {
+      border-top: 1px solid #e5e7eb;
+      padding-top: 14px;
+    }
+    .gv-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+    #gv-checkout-btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #0d6efd;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  `;
+  document.head.appendChild(style);
+
+  const modal = document.createElement("div");
+  modal.id = "gv-cart-modal";
+  modal.innerHTML = `
+    <div class="gv-modal-box">
+      <div class="gv-modal-header">
+        <h3>List Pembelian</h3>
+        <button id="gv-close-btn" type="button">&times;</button>
+      </div>
+      <div id="gv-cart-list"></div>
+      <div class="gv-modal-footer">
+        <div class="gv-total-row">
+          <span>Total Pembayaran</span>
+          <strong id="gv-total-price">Rp 0</strong>
+        </div>
+        <button id="gv-checkout-btn" type="button">Checkout Sekarang</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  const semuaTombol = Array.from(document.querySelectorAll("button, a"));
+  const cartBtn =
+    document.getElementById("cart-btn") ||
+    semuaTombol.find((el) => /keranjang/i.test(el.textContent));
+
+  const beliBtns = semuaTombol.filter((el) =>
+    /beli sekarang/i.test(el.textContent)
+  );
+
+  let keranjang = [];
+
+  const formatRupiah = (angka) => "Rp " + angka.toLocaleString("id-ID");
+
+  function updateCounterDanPulse() {
+    if (!cartBtn) return;
+    const totalQty = keranjang.reduce((sum, item) => sum + item.qty, 0);
+
+    const countSpan = cartBtn.querySelector("#cart-count, span");
+    if (countSpan) {
+      countSpan.textContent = totalQty;
+    } else {
+      cartBtn.textContent = `Keranjang (${totalQty})`;
+    }
+
+    cartBtn.classList.remove("gv-pulse");
+    void cartBtn.offsetWidth;
+    cartBtn.classList.add("gv-pulse");
+  }
+
+  function renderList() {
+    const listEl = document.getElementById("gv-cart-list");
+    const totalEl = document.getElementById("gv-total-price");
+
+    if (keranjang.length === 0) {
+      listEl.innerHTML = `<p style="text-align:center;color:#64748b;margin:20px 0;">Keranjang belanja masih kosong.</p>`;
+      totalEl.textContent = "Rp 0";
+      return;
+    }
+
+    let total = 0;
+    listEl.innerHTML = keranjang
+      .map((item, idx) => {
+        const subtotal = item.harga * item.qty;
+        total += subtotal;
+        return `
+          <div class="gv-item">
+            <div>
+              <div class="gv-item-title">${item.nama}</div>
+              <div class="gv-item-sub">${formatRupiah(item.harga)} x ${item.qty} = ${formatRupiah(subtotal)}</div>
+            </div>
+            <div class="gv-qty-controls">
+              <button type="button" data-action="minus" data-idx="${idx}">-</button>
+              <span>${item.qty}</span>
+              <button type="button" data-action="plus" data-idx="${idx}">+</button>
+              <button type="button" class="gv-del" data-action="del" data-idx="${idx}">Hapus</button>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+    totalEl.textContent = formatRupiah(total);
+  }
+
+  beliBtns.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      const card = btn.closest("div")?.parentElement || btn.parentElement;
+      const teksCard = card ? card.innerText : "";
+
+      const matchHarga = teksCard.match(/Rp\s*([\d.]+)/i);
+      const harga = matchHarga
+        ? Number(matchHarga[1].replace(/\./g, ""))
+        : 0;
+
+      const headingEl = card?.querySelector("h2, h3, h4, h5, strong");
+      const barisTeks = teksCard
+        .split("\n")
+        .map((t) => t.trim())
+        .filter(Boolean);
+      const nama =
+        btn.dataset.nama ||
+        headingEl?.textContent.trim() ||
+        barisTeks.find((t) => !/^Rp/i.test(t) && !/beli sekarang/i.test(t)) ||
+        "Produk";
+
+      const existing = keranjang.find((item) => item.nama === nama);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        keranjang.push({ nama, harga, qty: 1 });
+      }
+
+      updateCounterDanPulse();
+    });
+  });
+
+  document.getElementById("gv-cart-list").addEventListener("click", (e) => {
+    const action = e.target.dataset.action;
+    const idx = Number(e.target.dataset.idx);
+    if (!action) return;
+
+    if (action === "plus") keranjang[idx].qty += 1;
+    if (action === "minus") {
+      keranjang[idx].qty -= 1;
+      if (keranjang[idx].qty <= 0) keranjang.splice(idx, 1);
+    }
+    if (action === "del") keranjang.splice(idx, 1);
+
+    updateCounterDanPulse();
+    renderList();
+  });
+
+  if (cartBtn) {
+    cartBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      renderList();
+      modal.classList.add("active");
+    });
+  }
+
+  document.getElementById("gv-close-btn").addEventListener("click", () => {
+    modal.classList.remove("active");
+  });
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.classList.remove("active");
+  });
+
+  document.getElementById("gv-checkout-btn").addEventListener("click", () => {
+    if (keranjang.length === 0) return alert("Keranjang masih kosong!");
+    alert("Checkout berhasil! Terima kasih sudah belanja di GADGETVERSE.");
+    keranjang = [];
+    updateCounterDanPulse();
+    renderList();
+    modal.classList.remove("active");
+  });
+})();
+
+//done

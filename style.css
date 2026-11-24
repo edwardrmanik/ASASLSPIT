@@ -13,7 +13,7 @@
     font-family: 'Inter', sans-serif;
 }
 .card-body{
-    background-color: #e6e6e6;
+    background-color: #fcf8f8;
 }
 .main-navbar{
     background-color: #ffffff;
@@ -380,8 +380,8 @@
         color: var(--color-text-btn, #ffffff);
     }
     .btn-cart:hover{
-        transform: scale(1.5);
-        background-color: #0066cc;
+        transform: scale(1.1);
+        background-color: #2563eb;
         color: #060606;
     }
     .social-icon:hover{
